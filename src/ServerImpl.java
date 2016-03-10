@@ -13,7 +13,6 @@ public class ServerImpl implements Server {
         Game game = games.get(gameId);
         game.addObserver(o);
     }
-	
     
 	private Map<Integer, Game> games;
 	private int gameId;
@@ -69,5 +68,16 @@ public class ServerImpl implements Server {
 	public void fillBoard(Player player) throws RemoteException { //mo¿na tu jeszcze dodaæ walidacje tej tablicy statków, ale chyba starczy u klienta
 		Game game = games.get(player.getGameId());
 		game.fillBoard(player);
+	}
+
+	@Override
+	public void move(int gameId, int playerId, Point point) throws RemoteException {
+		Game game = games.get(gameId);
+		if(game == null) 
+			return;
+		String msg = game.move(playerId, point);
+		if(msg.equals("end")){
+			games.remove(gameId);
+		}
 	}
 }

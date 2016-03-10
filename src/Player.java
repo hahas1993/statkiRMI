@@ -13,7 +13,6 @@ public class Player implements Serializable {
 		this.id = id;
 		this.gameId = gameId;
 		this.howManyFieldsWithShips = 20;
-		board = new BoardStates[10][10];
 	}
 
 	public int getGameId() {
