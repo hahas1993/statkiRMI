@@ -5,8 +5,14 @@ import java.rmi.registry.Registry;
 import java.rmi.server.UnicastRemoteObject;
 import java.util.HashMap;
 import java.util.Map;
+
+import javax.rmi.ssl.SslRMIClientSocketFactory;
+import javax.rmi.ssl.SslRMIServerSocketFactory;
 	
-public class ServerImpl implements Server {
+public class ServerImpl extends UnicastRemoteObject implements Server {
+
+	private static final long serialVersionUID = 1L;
+	private static final int PORT = 4242;
 
     @Override
     public void addObserver(RemoteObserver o, int gameId) throws RemoteException {
@@ -17,7 +23,8 @@ public class ServerImpl implements Server {
 	private Map<Integer, Game> games;
 	private int gameId;
 	
-    public ServerImpl() {
+    public ServerImpl() throws Exception {
+    	super(0, new SslRMIClientSocketFactory(), new SslRMIServerSocketFactory());
     	games = new HashMap<Integer, Game>();
     	gameId = 0;
     }
@@ -25,15 +32,16 @@ public class ServerImpl implements Server {
     public static void main(String args[]) {
 	
 		try {
+			setSettings();
+			
 			ServerImpl obj = new ServerImpl();
-			Server stub = (Server) UnicastRemoteObject.exportObject(obj, 0);
+			Registry registry = LocateRegistry.createRegistry(PORT, new SslRMIClientSocketFactory(), new SslRMIServerSocketFactory(null, null, true));
 
-			// Bind the remote object's stub in the registry
-			Registry registry = LocateRegistry.getRegistry();
 			try{
-				registry.bind("Server", stub);
+				registry.bind("Server", obj);
 			} catch (AlreadyBoundException abex){
-				System.out.println("Server already bound");
+				registry.unbind("Server");
+				registry.bind("Server", obj);
 			}
 
 			System.err.println("Server ready");
@@ -42,6 +50,15 @@ public class ServerImpl implements Server {
 			e.printStackTrace();
 		}
     }
+    
+	private static void setSettings() {
+		String pass = "password";
+		System.setProperty("javax.net.ssl.debug", "all");
+		System.setProperty("javax.net.ssl.keyStore", "D:\\Users\\Pawel\\workspace\\StatkiRMI\\keys\\serverkeystore.jks");
+		System.setProperty("javax.net.ssl.keyStorePassword", pass);
+		System.setProperty("javax.net.ssl.trustStore", "D:\\Users\\Pawel\\workspace\\StatkiRMI\\keys\\clientcacerts.jks");
+		System.setProperty("javax.net.ssl.trustStorePassword", pass);
+	}
 
 	@Override
 	public Player searchGame(String nick) throws RemoteException {

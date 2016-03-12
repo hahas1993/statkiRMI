@@ -42,6 +42,8 @@ public class Game extends Observable implements GameService {
 	public void fillBoard(Player player) throws RemoteException { //mo¿na tu jeszcze dodaæ walidacje tej tablicy statków, ale chyba starczy u klienta
 		Player p = getPlayer(player.getId());
 		p.setBoard(player.getBoard());
+		if(playerA == null || playerB == null)
+			return;
 		if(playerA.getBoard() != null && playerB.getBoard() != null){
 			InfoMsg msg = new InfoMsg();
 			msg.setMsg("start");

@@ -1,5 +1,7 @@
+import java.io.Serializable;
 
-public class InfoMsg {
+public class InfoMsg implements Serializable {
+	private static final long serialVersionUID = 1L;
 	private int playerId;
 	private int turn; //kolejka gracza którego id == turn
 	private String msg; //jak == "start" to poczatek gry, jak =="move" to player o id == playerId ruszy³ siê na pole point, jak =="end" to wygra³ gracz o id==playerId
