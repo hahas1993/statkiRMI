@@ -40,7 +40,7 @@ public class Client extends UnicastRemoteObject implements RemoteObserver {
 		System.setProperty("javax.net.ssl.debug", "all");
 		System.setProperty("javax.net.ssl.keyStore", "D:\\Users\\Pawel\\workspace\\StatkiRMI\\keys\\clientkeystore.jks");
 		System.setProperty("javax.net.ssl.keyStorePassword", pass);
-		System.setProperty("javax.net.ssl.trustStore", "D:\\Users\\Pawel\\workspace\\StatkiRMI\\keys\\servercacerts.jks");
+		System.setProperty("javax.net.ssl.trustStore", "D:\\Users\\Pawel\\workspace\\StatkiRMI\\keys\\clienttruststore.jks");
 		System.setProperty("javax.net.ssl.trustStorePassword", pass);
 	}
 

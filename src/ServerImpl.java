@@ -1,17 +1,16 @@
 import java.rmi.AlreadyBoundException;
 import java.rmi.RemoteException;
+import java.rmi.activation.Activatable;
 import java.rmi.registry.LocateRegistry;
 import java.rmi.registry.Registry;
-import java.rmi.server.UnicastRemoteObject;
 import java.util.HashMap;
 import java.util.Map;
 
 import javax.rmi.ssl.SslRMIClientSocketFactory;
 import javax.rmi.ssl.SslRMIServerSocketFactory;
 	
-public class ServerImpl extends UnicastRemoteObject implements Server {
+public class ServerImpl implements Server {
 
-	private static final long serialVersionUID = 1L;
 	private static final int PORT = 4242;
 
     @Override
@@ -22,9 +21,8 @@ public class ServerImpl extends UnicastRemoteObject implements Server {
     
 	private Map<Integer, Game> games;
 	private int gameId;
-	
-    public ServerImpl() throws Exception {
-    	super(0, new SslRMIClientSocketFactory(), new SslRMIServerSocketFactory());
+
+    public ServerImpl() throws RemoteException {
     	games = new HashMap<Integer, Game>();
     	gameId = 0;
     }
@@ -35,7 +33,12 @@ public class ServerImpl extends UnicastRemoteObject implements Server {
 			setSettings();
 			
 			ServerImpl obj = new ServerImpl();
-			Registry registry = LocateRegistry.createRegistry(PORT, new SslRMIClientSocketFactory(), new SslRMIServerSocketFactory(null, null, true));
+			SslRMIClientSocketFactory csf = new SslRMIClientSocketFactory();
+			SslRMIServerSocketFactory ssf = new SslRMIServerSocketFactory();
+			
+			Activatable.exportObject(obj, null, PORT, csf, ssf);
+			
+			Registry registry = LocateRegistry.createRegistry(PORT, csf, ssf);
 
 			try{
 				registry.bind("Server", obj);
@@ -56,7 +59,7 @@ public class ServerImpl extends UnicastRemoteObject implements Server {
 		System.setProperty("javax.net.ssl.debug", "all");
 		System.setProperty("javax.net.ssl.keyStore", "D:\\Users\\Pawel\\workspace\\StatkiRMI\\keys\\serverkeystore.jks");
 		System.setProperty("javax.net.ssl.keyStorePassword", pass);
-		System.setProperty("javax.net.ssl.trustStore", "D:\\Users\\Pawel\\workspace\\StatkiRMI\\keys\\clientcacerts.jks");
+		System.setProperty("javax.net.ssl.trustStore", "D:\\Users\\Pawel\\workspace\\StatkiRMI\\keys\\servertruststore.jks");
 		System.setProperty("javax.net.ssl.trustStorePassword", pass);
 	}
 
