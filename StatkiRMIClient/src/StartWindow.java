@@ -23,7 +23,7 @@ public class StartWindow  extends JPanel{
     
     private JFrame startWindow;
     private static JTextField tf;
-    private String playerName;
+    private static String playerName;
     private static boolean saveClick=false; 
     
         public StartWindow() {
@@ -37,7 +37,7 @@ public class StartWindow  extends JPanel{
     private void createFrame() {
         startWindow = new JFrame("Statki");
         startWindow.setDefaultCloseOperation(JFrame.EXIT_ON_CLOSE);
-        startWindow.setLocationRelativeTo(null);
+      //  startWindow.setLocationRelativeTo(null);
         startWindow.getContentPane().add(new StartWindow(200,50));
         startWindow.setSize(100, 100);
         startWindow.pack();
@@ -63,7 +63,7 @@ public class StartWindow  extends JPanel{
             public void actionPerformed(ActionEvent e)
             {
                  if(!tf.getText().equals("nick") && !tf.getText().isEmpty()){
-                   System.out.println(tf.getText());
+                 //  System.out.println(tf.getText());
                     playerName=tf.getText();
                     setSaveClicked(true);
                 }

@@ -11,48 +11,38 @@ public class Client extends UnicastRemoteObject implements RemoteObserver {
 
     private static final long serialVersionUID = -5142389190052534862L;
     private static final int PORT = 4242;
-    private static boolean rozstawione = false;
-
-    /**
-     * @return the rozstawione
-     */
-    public static boolean isRozstawione() {
-        return rozstawione;
+    private static int count=0;
+    private static GUI g;
+    private static Player p;
+    private static Server server;
+    
+    private Client() throws RemoteException, InterruptedException {
+        g=new GUI();
     }
 
-    /**
-     * @param aRozstawione the rozstawione to set
-     */
-    public static void setRozstawione(boolean aRozstawione) {
-        rozstawione = aRozstawione;
-    }
-
-    private Client() throws RemoteException {
-    }
-
-    public static void main(String[] args) throws RemoteException {
+    public static void main(String[] args) throws RemoteException, InterruptedException {
 
         Client client = new Client();
         try {
             setSettings();
             Registry registry = LocateRegistry.getRegistry(null, PORT, new SslRMIClientSocketFactory());
-            Server server = (Server) registry.lookup("Server");
-            GUI g=new GUI();     
+            server = (Server) registry.lookup("Server");
+          //  g=new GUI();     
             while (g.isFlag() == false){
                   Thread.sleep(1000);
                 //Czy podano nick
             }
-            Player p = server.searchGame(g.getPlayerName());
+            p = server.searchGame(g.getPlayerName());
             System.out.println(p.getNick());
-            System.out.println("gra");
+          //  System.out.println(p.getGameId());
             server.addObserver(client, p.getGameId());
             BoardStates[][] boardStates = new BoardStates[10][10];
-            g.msgAreaSetText("Ustaw po kolei statki:\n1 x 4-masztowiec,\n2 x 3-masztowiec,\n3 x 2-masztowiec, \n4 x 1-masztowiec.\n ");
+            g.msgAreaSetText("Ustaw po kolei statki:\n1 x 4-masztowiec,\n2 x 3-masztowiec,\n3 x 2-masztowiec, \n4 x 1-masztowiec.\n");
             while (!g.isSaveClicked()) {  
-                System.out.println(g.isSaveClicked());
+              //  System.out.println(g.isSaveClicked());
                 Thread.sleep(100);
             }
-            g.msgAreaSetText("Statki rozstawione.\nGra rozpoczęta");
+            g.msgAreaSetText("Statki rozstawione.\n");
             JButton[][] playerBoard = g.getPlayerGrid();
             while (g.isShipsSet() == false){
                 Thread.sleep(1000);
@@ -61,8 +51,10 @@ public class Client extends UnicastRemoteObject implements RemoteObserver {
             p.setBoard(boardStates);
             //Jeżeli statki dobrze ustawione
             server.fillBoard(p);
-            //
-            System.out.println("plansza");
+            if(count<1){
+                g.msgAreaSetText("Oczekiwanie na rozstawienie statków przez przeciwnika....\n");
+            }
+           // System.out.println("plansza");
 
         } catch (Exception e) {
             System.err.println("Client exception: " + e.toString());
@@ -97,9 +89,28 @@ public class Client extends UnicastRemoteObject implements RemoteObserver {
     }
     @Override
     public void update(Object observable, Object updateMsg) throws RemoteException {
-        //InfoMsg msg = (InfoMsg) updateMsg;
-        //tutaj u�ywanie tej ca�ej wiadomo�ci do sprawdzania czyja kolej, zaznaczania na mapie ostatniego ruchu itp
+        count++;
+        if(count==1){
+            g.msgAreaSetText("Gra rozpoczęta.\n");
+        }
+        InfoMsg msg = (InfoMsg) updateMsg;
+        if(msg.getTurn() == msg.getPlayerId() && p.getId()==msg.getPlayerId()){
+            g.setPlayerTurn();
+        }
+        else{
+            g.setComTurn();
+        }
+     //   System.out.println(msg.toString());
+        //tutaj uzywanie tej calej wiadomosci do sprawdzania czyja kolej, zaznaczania na mapie ostatniego ruchu itp
         System.out.println(updateMsg);
+    }
+    
+    public static void hitField(int x, int y) throws RemoteException{
+        Point point = new Point();
+        point.setX(x);
+        point.setY(y);
+        System.out.println(x+","+y);
+        server.move(p.getGameId(),p.getId(),point);
     }
 
 }

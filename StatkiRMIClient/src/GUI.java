@@ -3,6 +3,9 @@ import javax.swing.*;
 import java.awt.GridLayout;
 import java.awt.*;
 import java.awt.event.*;
+import java.rmi.RemoteException;
+import java.util.logging.Level;
+import java.util.logging.Logger;
 import javax.swing.border.Border;
 import javax.swing.text.DefaultCaret;
 
@@ -13,11 +16,12 @@ public class GUI extends JPanel{
     private static JButton[][] ComGrid;
     private static JTextArea textArea;
     private static JButton zatwierdz;
+    private static Checkbox playerTurn;
+    private static Checkbox comTurn;
     private static JScrollPane scrollPane;
     private static ActionListener al;
     private static boolean shipsSet=false;
     private static boolean saveClicked = false;
-    private static boolean miss = true;
     
     public GUI() throws InterruptedException {
                 s = new StartWindow();
@@ -38,15 +42,21 @@ public class GUI extends JPanel{
         Border comBorder = BorderFactory.createTitledBorder("Statki przeciwnika");
         JPanel player = new JPanel();
         JPanel com = new JPanel();
+        CheckboxGroup cbg = new CheckboxGroup();
         zatwierdz = new JButton("Zatwierdź");
+        playerTurn = new Checkbox("Gracz",cbg,false);
+        comTurn = new Checkbox("Przeciwnik",cbg,false);
+        playerTurn.setEnabled(false);
+        comTurn.setEnabled(false);
         zatwierdz.addActionListener(new ActionListener() {
             public void actionPerformed(ActionEvent e)
             {
-                msgAreaSetText("Zatwierdz wcisniety");
+                msgAreaSetText("Zatwierdz wcisniety.\n");
                 saveClicked = true;      
                 zatwierdz.setEnabled(false);
             }
             });
+
         player.setBorder(playerBorder);// set border round player PlayerGrid 
         player.setLayout(new GridLayout(10, 10));
         com.setBorder(comBorder);// set border round com PlayerGrid        
@@ -54,11 +64,7 @@ public class GUI extends JPanel{
         PlayerGrid = new JButton[width][length]; //allocate the size of PlayerGrid
         ComGrid = new JButton[width][length]; //allocate the size of ComGrid
         createActionListener();
-        int a = 0;
         for (int y = 0; y < length; y++) {
-            a++;
-            String s = "" + a;
-            player.add(new JLabel(s));
             for (int x = 0; x < width; x++) {
                 PlayerGrid[x][y] = new JButton(); //creates new button    
                 player.add(PlayerGrid[x][y]); //adds button to PlayerGrid
@@ -77,6 +83,9 @@ public class GUI extends JPanel{
         }
         JPanel container = new JPanel();
         JPanel third = new JPanel();
+        JPanel bottomRight = new JPanel();
+        JPanel bottomLeft = new JPanel();
+        bottomRight.setLayout(new BoxLayout(bottomRight, BoxLayout.Y_AXIS));
         third.setBorder(BorderFactory.createTitledBorder("Statki"));// set border round com PlayerGrid  
         textArea = new JTextArea(10, 68);
         scrollPane = new JScrollPane(textArea);
@@ -84,8 +93,12 @@ public class GUI extends JPanel{
         textArea.setEditable(false);
         DefaultCaret caret = (DefaultCaret) textArea.getCaret();
         caret.setUpdatePolicy(DefaultCaret.ALWAYS_UPDATE);
-        third.add(scrollPane);
-        third.add(zatwierdz);
+        bottomLeft.add(scrollPane);
+        bottomRight.add(zatwierdz);
+        bottomRight.add(playerTurn);
+        bottomRight.add(comTurn);
+        third.add(bottomLeft);
+        third.add(bottomRight);
         container.add(player);
         container.add(com);
         this.setLayout(new BoxLayout(this, BoxLayout.Y_AXIS));
@@ -107,14 +120,14 @@ public class GUI extends JPanel{
         int x=b.getName().charAt(0);
         int y=b.getName().charAt(1);
         if(shipsSet==true){
-            //Gra - plansza przeciwnika
-            if(b.getBackground()==Color.LIGHT_GRAY){
-               if(miss == true){
-                    b.setBackground(Color.GRAY); //Pudlo
-               }
-               else if(miss == false){
-                   b.setBackground(Color.RED); //trafiony
-               }
+            try {
+                //Gra - plansza przeciwnika
+                if(b.getBackground()==Color.LIGHT_GRAY){
+                     Client.hitField(x,y);
+                }
+         
+            } catch (RemoteException ex) {
+                Logger.getLogger(GUI.class.getName()).log(Level.SEVERE, null, ex);
             }
         }
         else{
@@ -122,10 +135,10 @@ public class GUI extends JPanel{
             if(b.getBackground()==Color.WHITE){
                   b.setBackground(Color.GREEN);          
             }
-        }
-        System.out.println(b.getName());
-        
+        }      
     }
+    
+    
     private ActionListener getActionListener(){
             return al;
     }
@@ -133,7 +146,6 @@ public class GUI extends JPanel{
     public void msgAreaSetText(String text) {
         textArea.setText(textArea.getText()+text);
     }
-
     /**
      * @return the shipsSet
      */
@@ -148,30 +160,26 @@ public class GUI extends JPanel{
     public String getPlayerName(){
         return s.getPlayerName();
     }
-
-    /**
-     * @return the miss
-     */
-    public boolean isMiss() {
-        return miss;
-    }
-
-    /**
-     * @param pudlo the miss to set
-     */
-    public void setMiss(boolean pudlo) {
-        this.miss = pudlo;
-    }
-    //Zaznaczanie na Twoim polu, że przeciwnik trafił w statek
-    public void setHitField(int x, int y){
-        getPlayerGrid()[x][y].setBackground(Color.RED);
+    
+    //Zaznaczanie, ze spudlowales
+    public void setHitFieldCom(int x, int y){
+        getComGrid()[x][y].setBackground(Color.BLUE);
     }
     
-    //Zaznaczanie na Twoim polu, że przeciwnik spudłował
-    public void setMissField(int x, int y){
-        getPlayerGrid()[x][y].setBackground(Color.GRAY);
+   //Zaznaczenie ze trafiles
+    public void setMisHitFieldCom(int x, int y){
+        getComGrid()[x][y].setBackground(Color.GRAY);
     }
-
+    
+     //Zaznaczanie na Twoim polu, że przeciwnik spudłował
+    public void setMisHitFieldPlayer(int x, int y){
+         getComGrid()[x][y].setBackground(Color.GRAY);
+    }
+    
+     //Zaznaczanie na Twoim polu, że przeciwnik trafił w statek
+    public void setHitFieldPlayer(int x, int y){
+        getComGrid()[x][y].setBackground(Color.BLUE);
+    }
     /**
      * @return the saveClicked
      */
@@ -185,11 +193,21 @@ public class GUI extends JPanel{
     public JButton[][] getPlayerGrid() {
         return PlayerGrid;
     }
-
+    public JButton[][] getComGrid() {
+        return ComGrid;
+    }
     /**
      * @param shipsSet the shipsSet to set
      */
     public void setShipsSet(boolean shipsSet) {
         this.shipsSet = shipsSet;
+    }
+    
+    public void setPlayerTurn(){
+        playerTurn.setState(true);
+    }
+    
+    public void setComTurn(){
+        comTurn.setState(true);
     }
 }
