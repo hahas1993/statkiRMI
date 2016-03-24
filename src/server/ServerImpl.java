@@ -1,3 +1,4 @@
+package server;
 import java.rmi.AlreadyBoundException;
 import java.rmi.RemoteException;
 import java.rmi.activation.Activatable;
@@ -8,6 +9,10 @@ import java.util.Map;
 
 import javax.rmi.ssl.SslRMIClientSocketFactory;
 import javax.rmi.ssl.SslRMIServerSocketFactory;
+
+import utils.Player;
+import utils.Point;
+import utils.RemoteObserver;
 	
 public class ServerImpl implements Server {
 

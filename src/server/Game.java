@@ -1,7 +1,17 @@
+package server;
+
 import java.io.Serializable;
 import java.rmi.RemoteException;
 import java.util.Observable;
 import java.util.Observer;
+
+import utils.BoardStates;
+import utils.InfoMsg;
+import utils.Player;
+import utils.Point;
+import utils.RemoteObserver;
+
+
 
 public class Game extends Observable implements GameService {
 	 private class WrappedObserver implements Observer, Serializable {
@@ -57,6 +67,7 @@ public class Game extends Observable implements GameService {
 		InfoMsg msg = new InfoMsg();
 		msg.setPoint(point);
 		msg.setPlayerId(playerId);
+		msg.setMsg("move");
 		Player pa = playerB; // pod pa ten player który wykona³ ruch
 		Player pb = playerA;
 		if(playerA.getId() == playerId){
@@ -69,12 +80,6 @@ public class Game extends Observable implements GameService {
 			msg.setHit(true);
 			msg.setTurn(pa.getId());
 			pb.setHowManyFieldsWithShips(pb.getHowManyFieldsWithShips()-1);
-			if(pb.getHowManyFieldsWithShips() == 0){ //koniec gry
-				msg.setMsg("end");
-			}
-			else{
-				msg.setMsg("move");
-			}
 		}
 		else{
 			pb.getBoard()[point.getX()][point.getY()] = BoardStates.MISHIT;
@@ -84,6 +89,13 @@ public class Game extends Observable implements GameService {
 		
 		setChanged();
 		notifyObservers(msg);
+		
+		if(pb.getHowManyFieldsWithShips() == 0){ //koniec gry
+			msg.setMsg("end");
+			setChanged();
+			notifyObservers(msg);
+		}
+
 		return msg.getMsg();
 	}
 	

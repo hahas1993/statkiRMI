@@ -1,5 +1,10 @@
+package server;
 import java.rmi.Remote;
 import java.rmi.RemoteException;
+
+import utils.Player;
+import utils.Point;
+import utils.RemoteObserver;
 
 public interface Server extends Remote {
 	void addObserver(RemoteObserver o, int gameId) throws RemoteException;
