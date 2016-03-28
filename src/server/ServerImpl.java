@@ -62,9 +62,9 @@ public class ServerImpl implements Server {
 	private static void setSettings() {
 		String pass = "password";
 		System.setProperty("javax.net.ssl.debug", "all");
-		System.setProperty("javax.net.ssl.keyStore", "D:\\Users\\Pawel\\workspace\\StatkiRMI\\keys\\serverkeystore.jks");
+		System.setProperty("javax.net.ssl.keyStore", "keys/serverkeystore.jks");
 		System.setProperty("javax.net.ssl.keyStorePassword", pass);
-		System.setProperty("javax.net.ssl.trustStore", "D:\\Users\\Pawel\\workspace\\StatkiRMI\\keys\\servertruststore.jks");
+		System.setProperty("javax.net.ssl.trustStore", "keys/servertruststore.jks");
 		System.setProperty("javax.net.ssl.trustStorePassword", pass);
 	}
 
